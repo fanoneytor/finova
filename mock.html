@@ -1,0 +1,975 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>LexControl</title>
+<style>
+  body {
+    margin: 0;
+    font-family: 'Montserrat', sans-serif;
+    background-color: #f4f6f8;
+  }
+
+  /* ===== LOGIN ===== */
+  .login-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    background: linear-gradient(135deg, #1E3A5F, #2E5077);
+  }
+
+  .login-box {
+    background-color: white;
+    padding: 40px;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+    width: 340px;
+    text-align: center;
+  }
+  /* box-sizing global para evitar overflow inesperado */
+  * { box-sizing: border-box; }
+
+  /* Centrar y adaptar contenedores de registro/recuperación
+     para que los formularios largos no queden cortados en pantallas pequeñas */
+  .register-container {
+    display: none; /* por defecto oculto, se muestra con inline styles desde JS */
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100vh;
+    z-index: 9999;
+    justify-content: center;
+    align-items: center;
+    padding: 20px;
+    background: rgba(30,58,95,0.85); /* semitransparente para ver contexto */
+  }
+
+  .register-container .login-box {
+    width: 420px;
+    max-height: 90vh;
+    overflow-y: auto;
+    padding: 20px;
+    margin: 0 auto;
+    background: #fff;
+  }
+
+  @media (max-width: 480px) {
+    .register-container .login-box {
+      width: 100%;
+      max-height: 95vh;
+      padding: 16px;
+      border-radius: 8px;
+    }
+    .login-box { padding: 16px; }
+  }
+
+  .login-box h2 {
+    margin-bottom: 20px;
+    color: #1E3A5F;
+  }
+
+  .login-box input {
+    width: 100%;
+    padding: 10px;
+    margin: 8px 0;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+  }
+
+  .login-box button {
+    background-color: #2E5077;
+    color: white;
+    border: none;
+    padding: 10px;
+    width: 100%;
+    border-radius: 6px;
+    margin-top: 10px;
+    cursor: pointer;
+  }
+
+  .login-box button:hover {
+    background-color: #1E3A5F;
+  }
+
+  /* ===== DASHBOARD ===== */
+  .dashboard {
+    display: none;
+    height: 100vh;
+  }
+
+  .sidebar {
+    width: 250px;
+    background-color: #1E3A5F;
+    color: white;
+    display: flex;
+    flex-direction: column;
+    padding: 20px;
+  }
+
+  .logo-section {
+    display: flex;
+    align-items: center;
+    margin-bottom: 40px;
+    cursor: pointer;
+  }
+
+  .logo-section img {
+    width: 50px;
+    height: 50px;
+    margin-right: 10px;
+  }
+
+  .logo-section h1 {
+    font-size: 20px;
+    font-weight: 600;
+  }
+
+  .menu-item {
+    margin-bottom: 20px;
+  }
+
+  .menu-item button {
+    background: none;
+    border: none;
+    color: white;
+    font-size: 16px;
+    cursor: pointer;
+    text-align: left;
+    width: 100%;
+    padding: 10px 0;
+    padding-left: 8px;
+    transition: background-color 150ms ease, padding-left 150ms ease;
+  }
+
+  /* Hover en items del sidebar: un azul ligeramente más claro */
+  .sidebar .menu-item button:hover {
+    background-color: #2E5077; /* azul más claro respecto a #1E3A5F */
+    padding-left: 12px;
+    border-radius: 6px;
+  }
+
+  .sidebar .submenu button:hover {
+    background-color: rgba(255,255,255,0.08);
+    border-radius: 6px;
+  }
+
+  .submenu {
+    display: none;
+    margin-left: 15px;
+  }
+
+  .submenu button {
+    font-size: 14px;
+  }
+
+  .content {
+    flex-grow: 1;
+    padding: 30px;
+    background-color: #f4f6f8;
+    overflow-y: auto;
+  }
+
+  /* ===== FORMULARIOS ===== */
+  .formulario {
+    max-width: 800px;
+    margin: 0 auto;
+    background: white;
+    padding: 30px;
+    border-radius: 12px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+  }
+
+  h2 {
+    text-align: center;
+    color: #1E3A5F;
+  }
+
+  .form-section {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 15px;
+    margin-top: 20px;
+  }
+
+  label {
+    font-weight: 600;
+    color: #333;
+  }
+
+  input, select, textarea {
+    width: 100%;
+    padding: 8px;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+  }
+
+  input[readonly] {
+    background-color: #f0f0f0;
+  }
+
+  .form-buttons {
+    text-align: center;
+    margin-top: 20px;
+  }
+
+  .form-buttons button {
+    background-color: #2E5077;
+    color: white;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+  }
+
+  .form-buttons button:hover {
+    background-color: #1E3A5F;
+  }
+
+  .progress {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-bottom: 15px;
+  }
+
+  .progress span {
+    color: #1E3A5F;
+    font-weight: bold;
+    margin-right: 10px;
+  }
+
+  .circle {
+    width: 15px;
+    height: 15px;
+    border-radius: 50%;
+    background-color: lightgray;
+    margin: 0 5px;
+  }
+
+  .circle.active {
+    background-color: #1E3A5F;
+  }
+</style>
+</head>
+<body>
+
+<!-- ===== LOGIN ===== -->
+<div class="login-container" id="login">
+  <div class="login-box">
+    <h2>LexControl</h2>
+    <input type="text" placeholder="Usuario" id="usuario">
+    <input type="password" placeholder="Contraseña" id="password">
+    <button type="button" onclick="login()">Iniciar sesión</button>
+    <button type="button" onclick="mostrarRecuperacion()">Recuperar contraseña</button>
+  </div>
+</div>
+<!-- ===== RECUPERACIÓN (reutilizable) ===== -->
+<!-- ===== RECUPERACIÓN (reutilizable) ===== -->
+<div class="register-container" id="register" style="display: none;">
+  <div class="login-box" id="recoverBox">
+    <h2>Recuperar contraseña</h2>
+    <p>Ingrese su número de teléfono para recibir un código SMS y recuperar su contraseña.</p>
+    <input type="tel" id="telefonoRecuperacion" placeholder="Teléfono (ej. 3207096897)">
+    <button type="button" onclick="enviarCodigo()">Enviar código por SMS</button>
+    <button type="button" onclick="mostrarLogin()">Volver al inicio de sesión</button>
+  </div>
+</div>
+
+<!-- ===== REGISTRO DE USUARIOS ===== -->
+<div class="register-container" id="registerForm" style="display: none;">
+  <div class="login-box">
+    <h2>Registro de Usuario</h2>
+    <input type="hidden" id="reg_index" value="-1">
+    <input type="text" id="reg_nombre" placeholder="Nombre">
+    <input type="text" id="reg_apellido" placeholder="Apellido">
+    <input type="tel" id="reg_telefono" placeholder="Teléfono">
+    <input type="email" id="reg_correo" placeholder="Correo electrónico">
+    <input type="text" id="reg_documento" placeholder="Documento (N°)">
+    <input type="password" id="reg_contrasena" placeholder="Contraseña">
+    <div style="text-align:left;margin:8px 0;">
+      <label style="font-weight:normal;"><input type="checkbox" id="reg_acepta"> Acepto términos y condiciones</label>
+    </div>
+    <button type="button" id="reg_submit" onclick="registrarUsuario()">Registrarse</button>
+    <button type="button" onclick="mostrarUsuario()">Cancelar</button>
+  </div>
+</div>
+
+<!-- (Se elimina el formulario avanzado de registro; usamos el simple en #register) -->
+
+<!-- ===== DASHBOARD ===== -->
+<div class="dashboard" id="dashboard">
+  <div class="sidebar">
+    <div class="logo-section" onclick="volverInicio()">
+      <img src="https://upload.wikimedia.org/wikipedia/commons/2/2f/Escudo_del_Departamento_de_Risaralda.svg" alt="Gobernación de Risaralda">
+      <h1>LexControl</h1>
+    </div>
+
+    <div class="menu-item">
+      <button onclick="toggleSubmenu()">Procesos</button>
+      <div class="submenu" id="submenu">
+        <button onclick="mostrarFormulario1()">Nuevo proceso</button>
+        <button>Total de procesos: <span id="contador">0</span></button>
+      </div>
+    </div>
+
+    <div class="menu-item">
+      <button onclick="mostrarUsuario()">Usuario</button>
+    </div>
+  </div>
+
+  <div class="content" id="content">
+    <h2>Bienvenido a LexControl</h2>
+    <p>Seleccione una opción del menú para comenzar.</p>
+  </div>
+</div>
+
+<script>
+let procesos = 0;
+
+// Variables para flujo de recuperación
+let recoveryCode = null;
+let recoveryPhone = null;
+// Lista de usuarios registrados (demo en memoria)
+const users = [];
+
+const usuarioQuemado = {
+  correo: "admin@correo.com",
+  contrasena: "12345"
+};
+
+const usuarioActivo = {
+  secretaria: "Secretaría Jurídica",
+  correo: "lauren.cantorg@gmail.com",
+  apoderado: "Lauren Cantor",
+  telefono: "3207096897"
+};
+
+// Persistencia en localStorage
+function saveState() {
+  try {
+    localStorage.setItem('lex_users', JSON.stringify(users));
+    localStorage.setItem('lex_procesos', String(procesos));
+    localStorage.setItem('lex_usuarioQuemado', JSON.stringify(usuarioQuemado));
+    localStorage.setItem('lex_usuarioActivo', JSON.stringify(usuarioActivo));
+  } catch (e) {
+    console.warn('No se pudo guardar en localStorage:', e);
+  }
+}
+
+function loadState() {
+  try {
+    const sUsers = localStorage.getItem('lex_users');
+    if (sUsers) {
+      const parsed = JSON.parse(sUsers);
+      if (Array.isArray(parsed)) {
+        users.splice(0, users.length, ...parsed);
+      }
+    }
+
+    const sProcesos = localStorage.getItem('lex_procesos');
+    if (sProcesos !== null) {
+      const n = parseInt(sProcesos, 10);
+      if (!isNaN(n)) procesos = n;
+    }
+
+    const sUq = localStorage.getItem('lex_usuarioQuemado');
+    if (sUq) {
+      const parsed = JSON.parse(sUq);
+      if (parsed && parsed.correo) {
+        usuarioQuemado.correo = parsed.correo;
+        usuarioQuemado.contrasena = parsed.contrasena;
+      }
+    }
+
+    const sUa = localStorage.getItem('lex_usuarioActivo');
+    if (sUa) {
+      const parsed = JSON.parse(sUa);
+      if (parsed) {
+        usuarioActivo.secretaria = parsed.secretaria || usuarioActivo.secretaria;
+        usuarioActivo.correo = parsed.correo || usuarioActivo.correo;
+        usuarioActivo.apoderado = parsed.apoderado || usuarioActivo.apoderado;
+        usuarioActivo.telefono = parsed.telefono || usuarioActivo.telefono;
+      }
+    }
+  } catch (e) {
+    console.warn('No se pudo leer localStorage:', e);
+  }
+
+  // Actualizar UI
+  const contadorEl = document.getElementById('contador');
+  if (contadorEl) contadorEl.textContent = procesos;
+}
+
+// Cargar estado al arrancar
+loadState();
+
+function login() {
+  const usuario = document.getElementById('usuario').value.trim();
+  const password = document.getElementById('password').value;
+
+  // Primero verificar usuarios registrados en memoria
+  const encontrado = users.find(u => u.correo === usuario && u.contrasena === password);
+  if (encontrado) {
+    // establecer usuario activo y mostrar dashboard
+    usuarioActivo.apoderado = (encontrado.nombre || '') + (encontrado.apellido ? ' ' + encontrado.apellido : '');
+    usuarioActivo.correo = encontrado.correo;
+    usuarioActivo.telefono = encontrado.telefono || usuarioActivo.telefono;
+    usuarioActivo.secretaria = encontrado.secretaria || usuarioActivo.secretaria;
+
+    document.getElementById('login').style.display = 'none';
+    document.getElementById('register').style.display = 'none';
+    document.getElementById('registerForm').style.display = 'none';
+    document.getElementById('dashboard').style.display = 'flex';
+    return;
+  }
+
+  // Si no hay usuario registrado, comprobar usuario quemado por defecto
+  if (usuario === usuarioQuemado.correo && password === usuarioQuemado.contrasena) {
+    document.getElementById('login').style.display = 'none';
+    document.getElementById('register').style.display = 'none';
+    document.getElementById('registerForm').style.display = 'none';
+    document.getElementById('dashboard').style.display = 'flex';
+  } else {
+    alert("Usuario o contraseña incorrectos.");
+  }
+}
+
+function mostrarRecuperacion() {
+  document.getElementById('login').style.display = 'none';
+  // mostrar contenedor de recuperación (usa el mismo #register)
+  document.getElementById('register').style.display = 'flex';
+  // resetear contenido al estado inicial de recuperación
+  const box = document.getElementById('recoverBox');
+  if (box) {
+    box.innerHTML = `
+      <h2>Recuperar contraseña</h2>
+      <p>Ingrese su número de teléfono para recibir un código SMS y recuperar su contraseña.</p>
+      <input type="tel" id="telefonoRecuperacion" placeholder="Teléfono (ej. 3207096897)">
+      <button type="button" onclick="enviarCodigo()">Enviar código por SMS</button>
+      <button type="button" onclick="mostrarLogin()">Volver al inicio de sesión</button>
+    `;
+  }
+}
+
+function mostrarRegistro() {
+  // Mostrar el formulario de registro avanzado
+  document.getElementById('login').style.display = 'none';
+  document.getElementById('register').style.display = 'none';
+  document.getElementById('registerForm').style.display = 'flex';
+  // limpiar campos del formulario avanzado
+  document.getElementById('reg_index').value = -1;
+  document.getElementById('reg_nombre').value = '';
+  document.getElementById('reg_apellido').value = '';
+  document.getElementById('reg_telefono').value = '';
+  document.getElementById('reg_correo').value = '';
+  document.getElementById('reg_documento').value = '';
+  document.getElementById('reg_contrasena').value = '';
+  document.getElementById('reg_acepta').checked = false;
+  const submit = document.getElementById('reg_submit');
+  if (submit) submit.textContent = 'Registrarse';
+}
+
+function mostrarLogin() {
+  document.getElementById('register').style.display = 'none';
+  document.getElementById('login').style.display = 'flex';
+}
+
+function volverInicio() {
+  // vuelve a la pantalla inicial (login)
+  document.getElementById('dashboard').style.display = 'none';
+  document.getElementById('register').style.display = 'none';
+  document.getElementById('login').style.display = 'flex';
+}
+
+function toggleSubmenu() {
+  const submenu = document.getElementById('submenu');
+  submenu.style.display = submenu.style.display === 'block' ? 'none' : 'block';
+}
+
+
+
+function mostrarFormulario1() {
+  document.getElementById('content').innerHTML = `
+    <div class="formulario">
+      <div class="progress">
+        <span>Parte 1 de 2</span>
+        <div class="circle active"></div>
+        <div class="circle"></div>
+      </div>
+      <h2>Registro de Proceso</h2>
+      <div class="form-section">
+        <div><label>Secretaría de despacho</label><input type="text" value="${usuarioActivo.secretaria}" readonly></div>
+        <div>
+          <label>Calidad</label>
+          <select id="calidad" onchange="actualizarCedulaLabel()">
+            <option value="demandante">Demandante</option>
+            <option value="demandado">Demandado</option>
+          </select>
+        </div>
+        <div><label>Radicado</label><input type="text"></div>
+        <div><label>Nombre demandante</label><input type="text"></div>
+        <div><label>Nombre demandado</label><input type="text"></div>
+        <div>
+          <label id="cedulaLabel">Número de cédula demandante</label>
+          <input type="text">
+        </div>
+        <div><label>Fecha de notificación</label><input type="date"></div>
+
+        <div>
+          <label>Jurisdicción</label>
+          <select id="jurisdiccion" onchange="actualizarOpciones()">
+            <option value="">Seleccione</option>
+            <option value="civil">Jurisdicción Ordinaria – Civil</option>
+            <option value="laboral">Jurisdicción Ordinaria – Laboral</option>
+          </select>
+        </div>
+
+        <div>
+          <label>Acción judicial</label>
+          <select id="accionJudicial">
+            <option value="">Seleccione una jurisdicción</option>
+          </select>
+        </div>
+
+        <div>
+          <label>Corporación o juzgado</label>
+          <select id="coorporacion">
+            <option value="">Seleccione una jurisdicción</option>
+          </select>
+        </div>
+
+        <div><label>Despacho judicial</label><input type="text"></div>
+        <div><label>Dependencia responsable</label><input type="text"></div>
+        <div><label>Apoderado</label><input type="text" value="${usuarioActivo.apoderado}" readonly></div>
+        <div><label>Teléfono</label><input type="text" value="${usuarioActivo.telefono}" readonly></div>
+        <div><label>Correo</label><input type="email" value="${usuarioActivo.correo}" readonly></div>
+      </div>
+      <div class="form-buttons">
+        <button onclick="mostrarFormulario2()">Guardar y continuar</button>
+      </div>
+    </div>`;
+}
+
+function actualizarCedulaLabel() {
+  const calidad = document.getElementById("calidad").value;
+  const label = document.getElementById("cedulaLabel");
+  label.textContent = calidad === "demandante" ? 
+    "Número de cédula demandante" : 
+    "Número de cédula demandado";
+}
+
+function actualizarOpciones() {
+  const jurisdiccion = document.getElementById("jurisdiccion").value;
+  const accion = document.getElementById("accionJudicial");
+  const coorporacion = document.getElementById("coorporacion");
+
+  accion.innerHTML = "";
+  coorporacion.innerHTML = "";
+
+  if (jurisdiccion === "civil") {
+    accion.innerHTML = `
+      <option>Proceso Civil</option>
+      <option>Proceso declarativo (ordinario, abreviado, verbal, de mínima cuantía)</option>
+      <option>Proceso ejecutivo (para el cobro de obligaciones)</option>
+      <option>Proceso monitorio (para cobros pequeños, Ley 1564 de 2012)</option>
+      <option>Proceso de pertenencia (usucapión)</option>
+      <option>Proceso divisorio (partición de bienes comunes)</option>
+      <option>Proceso de restitución de inmueble arrendado</option>
+      <option>Proceso de rendición de cuentas</option>
+      <option>Acción reivindicatoria (recuperar un bien propio)</option>
+      <option>Acción de simulación</option>
+      <option>Acción de nulidad de contrato</option>
+      <option>Acción de responsabilidad civil contractual o extracontractual</option>
+    `;
+
+    coorporacion.innerHTML = `
+      <option>Despachos Civiles</option>
+      <option>Corte Suprema de Justicia – Sala de Casación Civil</option>
+      <option>Tribunales Superiores de Distrito Judicial – Salas Civiles</option>
+      <option>Juzgados Civiles del Circuito</option>
+      <option>Juzgados Civiles Municipales</option>
+      <option>Juzgados Civiles del Circuito Especializados en Restitución de Tierras</option>
+    `;
+  }
+
+  if (jurisdiccion === "laboral") {
+    accion.innerHTML = `
+      <option>Proceso Laboral y de la Seguridad Social</option>
+      <option>Proceso ordinario laboral</option>
+      <option>Proceso especial de fuero sindical</option>
+      <option>Proceso ejecutivo laboral</option>
+      <option>Proceso de seguridad social (pensiones, salud, riesgos laborales)</option>
+    `;
+
+    coorporacion.innerHTML = `
+      <option>Despachos Laborales</option>
+      <option>Corte Suprema de Justicia – Sala de Casación Laboral</option>
+      <option>Tribunales Superiores – Salas Laborales</option>
+      <option>Juzgados Laborales del Circuito</option>
+      <option>Juzgados de Pequeñas Causas Laborales (donde existan)</option>
+    `;
+  }
+}
+
+function mostrarFormulario2() {
+  document.getElementById('content').innerHTML = `
+    <div class="formulario">
+      <div class="progress">
+        <span>Parte 2 de 2</span>
+        <div class="circle"></div>
+        <div class="circle active"></div>
+      </div>
+      <h2>Detalles del Proceso</h2>
+      <div class="form-section">
+        <div>
+          <label>Sintesis</label>
+          <textarea placeholder="De qué trata la DDA"></textarea>
+        </div>
+
+        <div>
+          <label>Hecho generador</label>
+          <select>
+            <option value="">Seleccione</option>
+            <option>Sancion moratoria por no consignacion o pago de cesantias</option>
+            <option>Existencia relacion laboral, pago de prestaciones sociales</option>
+            <option>Reconocimiento y pago homologacion y nivelacion salarial</option>
+            <option>Pension, reajuste pensional, retroacivo de liquidacion, pension sobreviniente, cuotas, partes pensionales</option>
+            <option>pago bonificacion zona de dificil acceso</option>
+            <option>devolucion de dinero por recaudo tributario de estampilla pro-desarrollo de actos sujetos a registro de instrumentos <br> publicos o en camara de comercio y por cobro de impuestos vehiculos oficiales</option>
+            <option>Falla medica</option>
+            <option>Accidente de transito por mal estado de las vias </option>
+            <option>Acciones deslizamientos, afectaciones a predios y otros </option>
+            <option>Ajuste presupuestal de contratos. pago honorarios. adjudicacion </option>
+            <option>Proteccion derechos medio ambiente y seguridad ciudadana</option>
+             <option>Devolucion y contratos de emprestito</option>
+            </select>
+        </div>
+
+        <div>
+          <label>Tipo de pretensiones</label>
+          <select>
+            <option value="">Seleccione</option>
+            <option value="determinadas">Determinadas</option>
+            <option value="indeterminadas">Indeterminadas</option>
+          </select>
+        </div>
+
+        <div>
+          <label>Valor medida cautelar</label>
+          <input type="number" placeholder="Ingrese valor en números">
+        </div>
+
+        <div>
+          <label>Medida cautelar</label>
+          <select id="medidaCautelar" onchange="toggleValorCautelar()">
+            <option value="">Seleccione</option>
+            <option value="sí">Sí</option>
+            <option value="no">No</option>
+          </select>
+        </div>
+
+        <div>
+          <label>Valor de la medida cautelar</label>
+          <input type="text" id="valorCautelar" placeholder="# o N/A">
+        </div>
+
+        <div>
+          <label>Fortaleza de defensa</label>
+          <select>
+            <option value="">Seleccione</option>
+            <option>Alto</option>
+            <option>Medio Alto</option>
+            <option>Medio</option>
+            <option>Medio Bajo</option>
+            <option>Bajo</option>
+          </select>
+        </div>
+
+        <div>
+          <label>Fortaleza probatoria</label>
+          <select>
+            <option value="">Seleccione</option>
+            <option>Alto</option>
+            <option>Medio Alto</option>
+            <option>Medio</option>
+            <option>Medio Bajo</option>
+            <option>Bajo</option>
+          </select>
+        </div>
+
+        <div>
+          <label>Riesgos procesales</label>
+          <select>
+            <option value="">Seleccione</option>
+            <option>Alto</option>
+            <option>Medio Alto</option>
+            <option>Medio</option>
+            <option>Medio Bajo</option>
+            <option>Bajo</option>
+          </select>
+        </div>
+
+        <div>
+          <label>Nivel jurisprudencial</label>
+          <select>
+            <option value="">Seleccione</option>
+            <option>Alto</option>
+            <option>Medio Alto</option>
+            <option>Medio</option>
+            <option>Medio Bajo</option>
+            <option>Bajo</option>
+          </select>
+        </div>
+
+        <div>
+          <label>Fecha probable del fallo</label>
+          <input type="date">
+        </div>
+      </div>
+
+      <div class="form-buttons">
+        <button onclick="guardarProceso()">Guardar</button>
+      </div>
+    </div>`;
+}
+
+function toggleValorCautelar() {
+  const medida = document.getElementById("medidaCautelar").value;
+  const valor = document.getElementById("valorCautelar");
+  valor.value = medida === "no" ? "N/A" : "";
+  valor.readOnly = medida === "no";
+}
+
+// Enviar código (simulado) por SMS
+function enviarCodigo() {
+  const telefono = document.getElementById('telefonoRecuperacion')?.value.trim();
+  if (!telefono) {
+    alert('Ingrese su número de teléfono.');
+    return;
+  }
+
+  // Generar código de 4 dígitos
+  recoveryCode = Math.floor(1000 + Math.random() * 9000).toString();
+  recoveryPhone = telefono;
+
+  // Simular envío (en producción llamar a API SMS)
+  alert('Se ha enviado un código por SMS al número: ' + telefono + '\n(Código simulado: ' + recoveryCode + ')');
+
+  // Mostrar formulario para ingresar código
+  const box = document.getElementById('recoverBox');
+  if (box) {
+    box.innerHTML = `
+      <h2>Verificar código</h2>
+      <p>Ingrese el código recibido por SMS en el número <strong>${telefono}</strong>.</p>
+      <input type="text" id="codigoRecibido" placeholder="Código de 4 dígitos">
+      <button type="button" onclick="verificarCodigo()">Verificar código</button>
+      <button type="button" onclick="mostrarLogin()">Cancelar</button>
+    `;
+  }
+}
+
+function verificarCodigo() {
+  const codigo = document.getElementById('codigoRecibido')?.value.trim();
+  if (!codigo) {
+    alert('Ingrese el código recibido.');
+    return;
+  }
+  if (codigo === recoveryCode) {
+    // mostrar formulario para establecer nueva contraseña
+    const box = document.getElementById('recoverBox');
+    if (box) {
+      box.innerHTML = `
+        <h2>Nueva contraseña</h2>
+        <p>Ingrese su nueva contraseña para el usuario asociado al teléfono <strong>${recoveryPhone}</strong>.</p>
+        <input type="password" id="nuevaContrasena" placeholder="Nueva contraseña">
+        <input type="password" id="nuevaContrasena2" placeholder="Confirmar nueva contraseña">
+        <button type="button" onclick="establecerNuevaContrasena()">Establecer contraseña</button>
+        <button type="button" onclick="mostrarLogin()">Cancelar</button>
+      `;
+    }
+  } else {
+    alert('Código incorrecto. Por favor verifique y vuelva a intentar.');
+  }
+}
+
+function establecerNuevaContrasena() {
+  const p1 = document.getElementById('nuevaContrasena')?.value || '';
+  const p2 = document.getElementById('nuevaContrasena2')?.value || '';
+  if (!p1 || !p2) {
+    alert('Complete ambos campos de contraseña.');
+    return;
+  }
+  if (p1 !== p2) {
+    alert('Las contraseñas no coinciden.');
+    return;
+  }
+
+  // En este demo actualizamos la contraseña del usuario quemado
+  usuarioQuemado.contrasena = p1;
+  // persistir nuevo password
+  saveState();
+  alert('Contraseña restablecida. Ahora puede iniciar sesión con su nueva contraseña.');
+  // limpiar datos de recuperación
+  recoveryCode = null;
+  recoveryPhone = null;
+  mostrarLogin();
+}
+
+// Mostrar datos de usuario en el área de contenido
+function mostrarUsuario() {
+  // Si hay usuarios registrados, mostrar lista; si no, mostrar perfil activo
+  if (users.length > 0) {
+    let items = users.map((u, idx) => `
+      <div style="border:1px solid #eee;padding:12px;margin-bottom:10px;border-radius:8px;background:#fff;display:flex;justify-content:space-between;align-items:center;">
+        <div>
+          <strong>${u.nombre} ${u.apellido}</strong>
+          <div>Correo: ${u.correo}</div>
+          <div>Teléfono: ${u.telefono}</div>
+          <div>Documento: ${u.documento}</div>
+        </div>
+        <div style="display:flex;gap:8px;align-items:center;">
+          <button type=\"button\" onclick=\"editarUsuario(${idx})\">Editar</button>
+          <button type=\"button\" onclick=\"eliminarUsuario(${idx})\" style=\"background:#c0392b;\">Eliminar</button>
+        </div>
+      </div>
+    `).join('');
+
+    document.getElementById('content').innerHTML = `
+      <div class="formulario">
+        <h2>Usuarios registrados</h2>
+        <div style="text-align:right;margin-bottom:10px;"><button type=\"button\" onclick=\"mostrarRegistro()\">Crear usuario</button></div>
+        <div>${items}</div>
+        <div class="form-buttons">
+          <button type="button" onclick="cerrarSesion()">Cerrar sesión</button>
+        </div>
+      </div>`;
+    return;
+  }
+
+  const u = usuarioActivo || {};
+  document.getElementById('content').innerHTML = `
+    <div class="formulario">
+      <h2>Perfil de Usuario</h2>
+      <div class="form-section">
+        <div><label>Nombre</label><input type="text" id="perfilNombre" value="${u.apoderado || ''}"></div>
+        <div><label>Correo</label><input type="email" id="perfilCorreo" value="${u.correo || ''}"></div>
+        <div><label>Secretaría</label><input type="text" id="perfilSecretaria" value="${u.secretaria || ''}"></div>
+        <div><label>Teléfono</label><input type="text" id="perfilTelefono" value="${u.telefono || ''}"></div>
+      </div>
+      <div class="form-buttons">
+        <button type="button" onclick="guardarPerfil()">Guardar</button>
+        <button type="button" onclick="cerrarSesion()">Cerrar sesión</button>
+      </div>
+    </div>`;
+}
+
+function guardarPerfil() {
+  usuarioActivo.apoderado = document.getElementById('perfilNombre').value.trim();
+  usuarioActivo.correo = document.getElementById('perfilCorreo').value.trim();
+  usuarioActivo.secretaria = document.getElementById('perfilSecretaria').value.trim();
+  usuarioActivo.telefono = document.getElementById('perfilTelefono').value.trim();
+  // persistir cambios
+  saveState();
+  alert('Perfil guardado.');
+}
+
+function editarUsuario(index) {
+  const u = users[index];
+  if (!u) return alert('Usuario no encontrado');
+  // Mostrar formulario con datos para editar
+  document.getElementById('registerForm').style.display = 'flex';
+  document.getElementById('register').style.display = 'none';
+  document.getElementById('login').style.display = 'none';
+  document.getElementById('reg_index').value = index;
+  document.getElementById('reg_nombre').value = u.nombre;
+  document.getElementById('reg_apellido').value = u.apellido;
+  document.getElementById('reg_telefono').value = u.telefono;
+  document.getElementById('reg_correo').value = u.correo;
+  document.getElementById('reg_documento').value = u.documento;
+  document.getElementById('reg_contrasena').value = u.contrasena;
+  document.getElementById('reg_acepta').checked = true;
+  const submit = document.getElementById('reg_submit');
+  if (submit) submit.textContent = 'Guardar cambios';
+}
+
+function eliminarUsuario(index) {
+  if (!confirm('¿Eliminar este usuario? Esta acción no se puede deshacer.')) return;
+  users.splice(index, 1);
+  saveState();
+  mostrarUsuario();
+}
+
+function cerrarSesion() {
+  // limpia la sesión local y vuelve al login
+  document.getElementById('dashboard').style.display = 'none';
+  document.getElementById('login').style.display = 'flex';
+}
+
+// Registrar nuevo usuario (demo local)
+function registrarUsuario() {
+  const nombre = document.getElementById('reg_nombre').value.trim();
+  const apellido = document.getElementById('reg_apellido').value.trim();
+  const telefono = document.getElementById('reg_telefono').value.trim();
+  const correo = document.getElementById('reg_correo').value.trim();
+  const documento = document.getElementById('reg_documento').value.trim();
+  const contrasena = document.getElementById('reg_contrasena').value;
+  const acepta = document.getElementById('reg_acepta').checked;
+  const idx = parseInt(document.getElementById('reg_index').value, 10);
+
+  if (!nombre || !apellido || !telefono || !correo || !documento || !contrasena) {
+    alert('Por favor complete todos los campos.');
+    return;
+  }
+  if (!acepta) {
+    alert('Debe aceptar los términos y condiciones para registrarse.');
+    return;
+  }
+
+  if (!isNaN(idx) && idx >= 0 && idx < users.length) {
+    // Editar usuario existente
+    users[idx] = { nombre, apellido, telefono, correo, documento, contrasena };
+    // Si el usuario quemado coincide con el correo antiguo, actualizar
+    usuarioQuemado.correo = correo;
+    usuarioQuemado.contrasena = contrasena;
+    saveState();
+    alert('Usuario actualizado.');
+  } else {
+    const nuevo = { nombre, apellido, telefono, correo, documento, contrasena };
+    users.push(nuevo);
+    // Para permitir iniciar sesión con el nuevo usuario en este demo, actualizamos el usuario quemado
+    usuarioQuemado.correo = correo;
+    usuarioQuemado.contrasena = contrasena;
+    // Establecer usuario activo
+    usuarioActivo.apoderado = nombre + (apellido ? ' ' + apellido : '');
+    usuarioActivo.correo = correo;
+    usuarioActivo.telefono = telefono;
+    saveState();
+    alert('Registro exitoso. Usuario agregado.');
+  }
+
+  // Ocultar formulario y mostrar lista
+  document.getElementById('registerForm').style.display = 'none';
+  mostrarUsuario();
+}
+
+// Guardar proceso (demo): incrementa contador y actualiza UI
+function guardarProceso() {
+  procesos += 1;
+  document.getElementById('contador').textContent = procesos;
+  // persistir el contador
+  saveState();
+  alert('Proceso guardado. Total de procesos: ' + procesos);
+  // Volver al contenido principal
+  document.getElementById('content').innerHTML = `
+    <h2>Bienvenido a LexControl</h2>
+    <p>Seleccione una opción del menú para comenzar.</p>`;
+}
+
+</script>
+
+</body>
+</html>
+<!DOCTYPE html>
