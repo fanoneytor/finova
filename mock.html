@@ -303,7 +303,7 @@
 <div class="dashboard" id="dashboard">
   <div class="sidebar">
     <div class="logo-section" onclick="volverInicio()">
-      <img src="https://upload.wikimedia.org/wikipedia/commons/2/2f/Escudo_del_Departamento_de_Risaralda.svg" alt="Gobernación de Risaralda">
+      <img src="logo.png" alt="LexControl Logo">
       <h1>LexControl</h1>
     </div>
 
@@ -407,34 +407,11 @@ function loadState() {
 loadState();
 
 function login() {
-  const usuario = document.getElementById('usuario').value.trim();
-  const password = document.getElementById('password').value;
-
-  // Primero verificar usuarios registrados en memoria
-  const encontrado = users.find(u => u.correo === usuario && u.contrasena === password);
-  if (encontrado) {
-    // establecer usuario activo y mostrar dashboard
-    usuarioActivo.apoderado = (encontrado.nombre || '') + (encontrado.apellido ? ' ' + encontrado.apellido : '');
-    usuarioActivo.correo = encontrado.correo;
-    usuarioActivo.telefono = encontrado.telefono || usuarioActivo.telefono;
-    usuarioActivo.secretaria = encontrado.secretaria || usuarioActivo.secretaria;
-
-    document.getElementById('login').style.display = 'none';
-    document.getElementById('register').style.display = 'none';
-    document.getElementById('registerForm').style.display = 'none';
-    document.getElementById('dashboard').style.display = 'flex';
-    return;
-  }
-
-  // Si no hay usuario registrado, comprobar usuario quemado por defecto
-  if (usuario === usuarioQuemado.correo && password === usuarioQuemado.contrasena) {
-    document.getElementById('login').style.display = 'none';
-    document.getElementById('register').style.display = 'none';
-    document.getElementById('registerForm').style.display = 'none';
-    document.getElementById('dashboard').style.display = 'flex';
-  } else {
-    alert("Usuario o contraseña incorrectos.");
-  }
+  // Sin validación de usuario ni contraseña
+  document.getElementById('login').style.display = 'none';
+  document.getElementById('register').style.display = 'none';
+  document.getElementById('registerForm').style.display = 'none';
+  document.getElementById('dashboard').style.display = 'flex';
 }
 
 function mostrarRecuperacion() {
@@ -731,6 +708,7 @@ function mostrarFormulario2() {
       </div>
 
       <div class="form-buttons">
+        <button onclick="mostrarFormulario1()">Volver</button>
         <button onclick="guardarProceso()">Guardar</button>
       </div>
     </div>`;
