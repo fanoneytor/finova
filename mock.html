@@ -278,49 +278,6 @@
   </div>
 </div>
 
-<!-- ===== REGISTRO DE USUARIOS ===== -->
-<div class="register-container" id="registerForm" style="display: none;">
-  <div class="login-box">
-    <h2>Registro de Usuario</h2>
-    <input type="hidden" id="reg_index" value="-1">
-    <input type="text" id="reg_nombre" placeholder="Nombre">
-    <input type="text" id="reg_apellido" placeholder="Apellido">
-    <input type="tel" id="reg_telefono" placeholder="Teléfono">
-    <input type="email" id="reg_correo" placeholder="Correo electrónico">
-    <label style="text-align:left;margin:8px 0;">Tipo de documento</label>
-    <select id="reg_tipoDocumento">
-      <option value="CC">Cédula de Ciudadanía</option>
-      <option value="TI">Tarjeta de Identidad</option>
-      <option value="CE">Cédula de Extranjería</option>
-      <option value="PA">Pasaporte</option>
-      <option value="RC">Registro Civil</option>
-      <option value="NIT">NIT</option>
-      <option value="OTRO">Otro</option>
-    </select>
-    <input type="text" id="reg_documento" placeholder="Documento (N°)">
-    <label style="text-align:left;margin:8px 0;">Secretaría</label>
-    <select id="reg_secretaria">
-      <option value="SECRETARÍA ADMINISTRATIVA">SECRETARÍA ADMINISTRATIVA</option>
-      <option value="SECRETARÍA DE EDUCACIÓN">SECRETARÍA DE EDUCACIÓN</option>
-      <option value="SECRETARÍA DE HACIENDA">SECRETARÍA DE HACIENDA</option>
-      <option value="GESTIÓN DE RIESGO RISARALDA">GESTIÓN DE RIESGO RISARALDA</option>
-      <option value="SECRETARÍA DE PLANEACIÓN">SECRETARÍA DE PLANEACIÓN</option>
-      <option value="SECRETARÍA DE SALUD">SECRETARÍA DE SALUD</option>
-      <option value="SECRETARÍA DE INFRAESTRUCTURA">SECRETARÍA DE INFRAESTRUCTURA</option>
-      <option value="SECRETARÍA DE DEPORTES, RECREACIÓN Y CULTURA">SECRETARÍA DE DEPORTES, RECREACIÓN Y CULTURA</option>
-      <option value="SECRETARÍA JURÍDICA">SECRETARÍA JURÍDICA</option>
-      <option value="SECRETARÍA DE LA MUJER FAMILIA Y DESARROLLO SOCIAL">SECRETARÍA DE LA MUJER FAMILIA Y DESARROLLO SOCIAL</option>
-      <option value="OTROS">OTROS</option>
-    </select>
-    <input type="password" id="reg_contrasena" placeholder="Contraseña">
-    <div style="text-align:left;margin:8px 0;">
-      <label style="font-weight:normal;"><input type="checkbox" id="reg_acepta"> Acepto términos y condiciones</label>
-    </div>
-    <button type="button" id="reg_submit" onclick="registrarUsuario()">Registrarse</button>
-    <button type="button" onclick="mostrarUsuario()">Cancelar</button>
-  </div>
-</div>
-
 <!-- (Se elimina el formulario avanzado de registro; usamos el simple en #register) -->
 
 <!-- ===== DASHBOARD ===== -->
@@ -372,11 +329,28 @@ let listaProcesos = [
   },
 ]; // Nuevo array para almacenar los procesos
 
-// Variables para flujo de recuperación
-let recoveryCode = null;
-let recoveryPhone = null;
-// Lista de usuarios registrados (demo en memoria)
-const users = [];
+const users = [
+  {
+    nombre: "Admin",
+    apellido: "User",
+    telefono: "1234567890",
+    correo: "admin@example.com",
+    tipoDocumento: "CC",
+    documento: "1000000000",
+    secretaria: "SECRETARÍA ADMINISTRATIVA",
+    contrasena: "12345",
+  },
+  {
+    nombre: "Test",
+    apellido: "User",
+    telefono: "0987654321",
+    correo: "test@example.com",
+    tipoDocumento: "CE",
+    documento: "123456789",
+    secretaria: "SECRETARÍA DE EDUCACIÓN",
+    contrasena: "password",
+  },
+]; // Mock data for users
 
 const usuarioQuemado = {
   correo: "admin@correo.com",
@@ -408,7 +382,7 @@ function loadState() {
     const sUsers = localStorage.getItem('lex_users');
     if (sUsers) {
       const parsed = JSON.parse(sUsers);
-      if (Array.isArray(parsed)) {
+      if (Array.isArray(parsed) && parsed.length > 0) {
         users.splice(0, users.length, ...parsed);
       }
     }
@@ -468,7 +442,6 @@ function login() {
   // Sin validación de usuario ni contraseña
   document.getElementById('login').style.display = 'none';
   document.getElementById('register').style.display = 'none';
-  document.getElementById('registerForm').style.display = 'none';
   document.getElementById('dashboard').style.display = 'flex';
 }
 
@@ -489,22 +462,56 @@ function mostrarRecuperacion() {
   }
 }
 
-function mostrarRegistro() {
-  // Mostrar el formulario de registro avanzado
-  document.getElementById('login').style.display = 'none';
-  document.getElementById('register').style.display = 'none';
-  document.getElementById('registerForm').style.display = 'flex';
-  // limpiar campos del formulario avanzado
-  document.getElementById('reg_index').value = -1;
-  document.getElementById('reg_nombre').value = '';
-  document.getElementById('reg_apellido').value = '';
-  document.getElementById('reg_telefono').value = '';
-  document.getElementById('reg_correo').value = '';
-  document.getElementById('reg_documento').value = '';
-  document.getElementById('reg_contrasena').value = '';
-  document.getElementById('reg_acepta').checked = false;
-  const submit = document.getElementById('reg_submit');
-  if (submit) submit.textContent = 'Registrarse';
+function mostrarRegistro(user = null, index = -1) {
+  let title = user ? 'Editar Usuario' : 'Registro de Usuario';
+  let submitText = user ? 'Guardar cambios' : 'Registrarse';
+
+  document.getElementById('content').innerHTML = `
+    <div class="formulario">
+      <h2>${title}</h2>
+      <input type="hidden" id="reg_index" value="${index}">
+      <div class="form-section">
+        <div><label>Nombre</label><input type="text" id="reg_nombre" placeholder="Nombre" value="${user?.nombre || ''}"></div>
+        <div><label>Apellido</label><input type="text" id="reg_apellido" placeholder="Apellido" value="${user?.apellido || ''}"></div>
+        <div><label>Teléfono</label><input type="tel" id="reg_telefono" placeholder="Teléfono" value="${user?.telefono || ''}"></div>
+        <div><label>Correo</label><input type="email" id="reg_correo" placeholder="Correo electrónico" value="${user?.correo || ''}"></div>
+        <div><label>Tipo de documento</label>
+          <select id="reg_tipoDocumento">
+            <option value="CC" ${user?.tipoDocumento === 'CC' ? 'selected' : ''}>Cédula de Ciudadanía</option>
+            <option value="TI" ${user?.tipoDocumento === 'TI' ? 'selected' : ''}>Tarjeta de Identidad</option>
+            <option value="CE" ${user?.tipoDocumento === 'CE' ? 'selected' : ''}>Cédula de Extranjería</option>
+            <option value="PA" ${user?.tipoDocumento === 'PA' ? 'selected' : ''}>Pasaporte</option>
+            <option value="RC" ${user?.tipoDocumento === 'RC' ? 'selected' : ''}>Registro Civil</option>
+            <option value="NIT" ${user?.tipoDocumento === 'NIT' ? 'selected' : ''}>NIT</option>
+            <option value="OTRO" ${user?.tipoDocumento === 'OTRO' ? 'selected' : ''}>Otro</option>
+          </select>
+        </div>
+        <div><label>Documento</label><input type="text" id="reg_documento" placeholder="Documento (N°)" value="${user?.documento || ''}"></div>
+        <div><label>Secretaría</label>
+          <select id="reg_secretaria">
+            <option value="SECRETARÍA ADMINISTRATIVA" ${user?.secretaria === 'SECRETARÍA ADMINISTRATIVA' ? 'selected' : ''}>SECRETARÍA ADMINISTRATIVA</option>
+            <option value="SECRETARÍA DE EDUCACIÓN" ${user?.secretaria === 'SECRETARÍA DE EDUCACIÓN' ? 'selected' : ''}>SECRETARÍA DE EDUCACIÓN</option>
+            <option value="SECRETARÍA DE HACIENDA" ${user?.secretaria === 'SECRETARÍA DE HACIENDA' ? 'selected' : ''}>SECRETARÍA DE HACIENDA</option>
+            <option value="GESTIÓN DE RIESGO RISARALDA" ${user?.secretaria === 'GESTIÓN DE RIESGO RISARALDA' ? 'selected' : ''}>GESTIÓN DE RIESGO RISARALDA</option>
+            <option value="SECRETARÍA DE PLANEACIÓN" ${user?.secretaria === 'SECRETARÍA DE PLANEACIÓN' ? 'selected' : ''}>SECRETARÍA DE PLANEACIÓN</option>
+            <option value="SECRETARÍA DE SALUD" ${user?.secretaria === 'SECRETARÍA DE SALUD' ? 'selected' : ''}>SECRETARÍA DE SALUD</option>
+            <option value="SECRETARÍA DE INFRAESTRUCTURA" ${user?.secretaria === 'SECRETARÍA DE INFRAESTRUCTURA' ? 'selected' : ''}>SECRETARÍA DE INFRAESTRUCTURA</option>
+            <option value="SECRETARÍA DE DEPORTES, RECREACIÓN Y CULTURA" ${user?.secretaria === 'SECRETARÍA DE DEPORTES, RECREACIÓN Y CULTURA' ? 'selected' : ''}>SECRETARÍA DE DEPORTES, RECREACIÓN Y CULTURA</option>
+            <option value="SECRETARÍA JURÍDICA" ${user?.secretaria === 'SECRETARÍA JURÍDICA' ? 'selected' : ''}>SECRETARÍA JURÍDICA</option>
+            <option value="SECRETARÍA DE LA MUJER FAMILIA Y DESARROLLO SOCIAL" ${user?.secretaria === 'SECRETARÍA DE LA MUJER FAMILIA Y DESARROLLO SOCIAL' ? 'selected' : ''}>SECRETARÍA DE LA MUJER FAMILIA Y DESARROLLO SOCIAL</option>
+            <option value="OTROS" ${user?.secretaria === 'OTROS' ? 'selected' : ''}>OTROS</option>
+          </select>
+        </div>
+        <div><label>Contraseña</label><input type="password" id="reg_contrasena" placeholder="Contraseña" value="${user?.contrasena || ''}"></div>
+      </div>
+      <div style="text-align:left;margin:8px 0;">
+        <label style="font-weight:normal;"><input type="checkbox" id="reg_acepta" ${user ? 'checked disabled' : ''}> Acepto términos y condiciones</label>
+      </div>
+      <div class="form-buttons">
+        <button type="button" id="reg_submit" onclick="registrarUsuario()">${submitText}</button>
+        <button type="button" onclick="mostrarUsuario()">Cancelar</button>
+      </div>
+    </div>`;
 }
 
 function mostrarLogin() {
@@ -584,8 +591,9 @@ function mostrarFormulario1() {
   document.getElementById('content').innerHTML = `
     <div class="formulario">
       <div class="progress">
-        <span>Parte 1 de 2</span>
+        <span>Parte 1 de 3</span>
         <div class="circle active"></div>
+        <div class="circle"></div>
         <div class="circle"></div>
       </div>
       <h2>Registro de Proceso</h2>
@@ -1004,89 +1012,51 @@ function establecerNuevaContrasena() {
 
 // Mostrar datos de usuario en el área de contenido
 function mostrarUsuario() {
-  // Si hay usuarios registrados, mostrar lista; si no, mostrar perfil activo
-  if (users.length > 0) {
-    let items = users.map((u, idx) => `
-      <div style="border:1px solid #eee;padding:12px;margin-bottom:10px;border-radius:8px;background:#fff;display:flex;justify-content:space-between;align-items:center;">
-        <div>
-          <strong>${u.nombre} ${u.apellido}</strong>
-          <div>Correo: ${u.correo}</div>
-          <div>Teléfono: ${u.telefono}</div>
-          <div>Documento: ${u.documento}</div>
-        </div>
-        <div style="display:flex;gap:8px;align-items:center;">
-          <button type=\"button\" onclick=\"editarUsuario(${idx})\">Editar</button>
-          <button type=\"button\" onclick=\"eliminarUsuario(${idx})\" style=\"background:#c0392b;\">Eliminar</button>
-        </div>
-      </div>
-    `).join('');
+  // Ocultar el formulario de registro si está visible (ya no es un modal, pero se mantiene por si acaso)
 
-    document.getElementById('content').innerHTML = `
-      <div class="formulario">
-        <h2>Usuarios registrados</h2>
-        <div style="text-align:right;margin-bottom:10px;"><button type=\"button\" onclick=\"mostrarRegistro()\">Crear usuario</button></div>
-        <div>${items}</div>
-        <div class="form-buttons">
-          <button type="button" onclick="cerrarSesion()">Cerrar sesión</button>
-        </div>
-      </div>`;
-    return;
-  }
+  let items = users.map((u, idx) => `
+    <tr>
+      <td style="padding: 8px; border: 1px solid #ddd;">${u.nombre}</td>
+      <td style="padding: 8px; border: 1px solid #ddd;">${u.apellido}</td>
+      <td style="padding: 8px; border: 1px solid #ddd;">${u.correo}</td>
+      <td style="padding: 8px; border: 1px solid #ddd;">${u.telefono}</td>
+      <td style="padding: 8px; border: 1px solid #ddd;">${u.tipoDocumento}</td>
+      <td style="padding: 8px; border: 1px solid #ddd;">${u.documento}</td>
+      <td style="padding: 8px; border: 1px solid #ddd;">${u.secretaria}</td>
+      <td style="padding: 8px; border: 1px solid #ddd;">
+        <button onclick="editarUsuario(${idx})" style="background: none; border: none; cursor: pointer; margin-right: 5px;">✏️</button>
+        <button onclick="eliminarUsuario(${idx})" style="background: none; border: none; cursor: pointer;">🗑️</button>
+      </td>
+    </tr>
+  `).join('');
 
-  const u = usuarioActivo || {};
   document.getElementById('content').innerHTML = `
     <div class="formulario">
-      <h2>Perfil de Usuario</h2>
-      <div class="form-section">
-        <div><label>Nombre</label><input type="text" id="perfilNombre" value="${u.apoderado || ''}"></div>
-        <div><label>Apellido</label><input type="text" id="perfilApellido" value="${u.apellido || ''}"></div>
-        <div><label>Correo</label><input type="email" id="perfilCorreo" value="${u.correo || ''}"></div>
-        <div><label>Teléfono</label><input type="text" id="perfilTelefono" value="${u.telefono || ''}"></div>
-        <div><label>Tipo de documento</label>
-          <select id="perfilTipoDocumento">
-            <option value="CC">Cédula de Ciudadanía</option>
-            <option value="TI">Tarjeta de Identidad</option>
-            <option value="CE">Cédula de Extranjería</option>
-            <option value="PA">Pasaporte</option>
-            <option value="RC">Registro Civil</option>
-            <option value="NIT">NIT</option>
-            <option value="OTRO">Otro</option>
-          </select>
-        </div>
-        <div><label>Documento</label><input type="text" id="perfilDocumento" value="${u.documento || ''}"></div>
-        <div><label>Secretaría</label>
-          <select id="perfilSecretaria">
-            <option value="SECRETARÍA ADMINISTRATIVA">SECRETARÍA ADMINISTRATIVA</option>
-            <option value="SECRETARÍA DE EDUCACIÓN">SECRETARÍA DE EDUCACIÓN</option>
-            <option value="SECRETARÍA DE HACIENDA">SECRETARÍA DE HACIENDA</option>
-            <option value="GESTIÓN DE RIESGO RISARALDA">GESTIÓN DE RIESGO RISARALDA</option>
-            <option value="SECRETARÍA DE PLANEACIÓN">SECRETARÍA DE PLANEACIÓN</option>
-            <option value="SECRETARÍA DE SALUD">SECRETARÍA DE SALUD</option>
-            <option value="SECRETARÍA DE INFRAESTRUCTURA">SECRETARÍA DE INFRAESTRUCTURA</option>
-            <option value="SECRETARÍA DE DEPORTES, RECREACIÓN Y CULTURA">SECRETARÍA DE DEPORTES, RECREACIÓN Y CULTURA</option>
-            <option value="SECRETARÍA JURÍDICA">SECRETARÍA JURÍDICA</option>
-            <option value="SECRETARÍA DE LA MUJER FAMILIA Y DESARROLLO SOCIAL">SECRETARÍA DE LA MUJER FAMILIA Y DESARROLLO SOCIAL</option>
-            <option value="OTROS">OTROS</option>
-          </select>
-        </div>
-        <div><label>Teléfono</label><input type="text" id="perfilTelefono" value="${u.telefono || ''}"></div>
+      <h2>Usuarios registrados</h2>
+      <div class="form-buttons" style="text-align:right;margin-bottom:10px;"><button type="button" onclick="mostrarRegistro()">Crear usuario</button></div>
+      <div style="overflow-x: auto;">
+        <table style="width:100%; border-collapse: collapse; margin-top: 20px;">
+          <thead>
+            <tr style="background-color: #f2f2f2;">
+              <th style="padding: 8px; border: 1px solid #ddd; text-align: left;">Nombre</th>
+              <th style="padding: 8px; border: 1px solid #ddd; text-align: left;">Apellido</th>
+              <th style="padding: 8px; border: 1px solid #ddd; text-align: left;">Correo</th>
+              <th style="padding: 8px; border: 1px solid #ddd; text-align: left;">Teléfono</th>
+              <th style="padding: 8px; border: 1px solid #ddd; text-align: left;">Tipo Doc.</th>
+              <th style="padding: 8px; border: 1px solid #ddd; text-align: left;">Documento</th>
+              <th style="padding: 8px; border: 1px solid #ddd; text-align: left;">Secretaría</th>
+              <th style="padding: 8px; border: 1px solid #ddd; text-align: left;">Acciones</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${items}
+          </tbody>
+        </table>
       </div>
       <div class="form-buttons">
-        <button type="button" onclick="guardarPerfil()">Guardar</button>
         <button type="button" onclick="cerrarSesion()">Cerrar sesión</button>
       </div>
     </div>`;
-
-  // Set the selected value for the secretaria dropdown
-  const perfilSecretariaSelect = document.getElementById('perfilSecretaria');
-  if (perfilSecretariaSelect && u.secretaria) {
-    perfilSecretariaSelect.value = u.secretaria;
-  }
-
-  const perfilTipoDocumentoSelect = document.getElementById('perfilTipoDocumento');
-  if (perfilTipoDocumentoSelect && u.tipoDocumento) {
-    perfilTipoDocumentoSelect.value = u.tipoDocumento;
-  }
 }
 
 function guardarPerfil() {
@@ -1106,21 +1076,7 @@ function editarUsuario(index) {
   const u = users[index];
   if (!u) return alert('Usuario no encontrado');
   // Mostrar formulario con datos para editar
-  document.getElementById('registerForm').style.display = 'flex';
-  document.getElementById('register').style.display = 'none';
-  document.getElementById('login').style.display = 'none';
-  document.getElementById('reg_index').value = index;
-  document.getElementById('reg_nombre').value = u.nombre;
-  document.getElementById('reg_apellido').value = u.apellido;
-  document.getElementById('reg_telefono').value = u.telefono;
-  document.getElementById('reg_correo').value = u.correo;
-  document.getElementById('reg_tipoDocumento').value = u.tipoDocumento || 'CC'; // Default to CC if not set
-  document.getElementById('reg_documento').value = u.documento;
-  document.getElementById('reg_secretaria').value = u.secretaria || 'OTROS'; // Default to OTROS if not set
-  document.getElementById('reg_contrasena').value = u.contrasena;
-  document.getElementById('reg_acepta').checked = true;
-  const submit = document.getElementById('reg_submit');
-  if (submit) submit.textContent = 'Guardar cambios';
+  mostrarRegistro(u, index);
 }
 
 function eliminarUsuario(index) {
