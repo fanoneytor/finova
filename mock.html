@@ -287,7 +287,31 @@
     <input type="text" id="reg_apellido" placeholder="Apellido">
     <input type="tel" id="reg_telefono" placeholder="Teléfono">
     <input type="email" id="reg_correo" placeholder="Correo electrónico">
+    <label style="text-align:left;margin:8px 0;">Tipo de documento</label>
+    <select id="reg_tipoDocumento">
+      <option value="CC">Cédula de Ciudadanía</option>
+      <option value="TI">Tarjeta de Identidad</option>
+      <option value="CE">Cédula de Extranjería</option>
+      <option value="PA">Pasaporte</option>
+      <option value="RC">Registro Civil</option>
+      <option value="NIT">NIT</option>
+      <option value="OTRO">Otro</option>
+    </select>
     <input type="text" id="reg_documento" placeholder="Documento (N°)">
+    <label style="text-align:left;margin:8px 0;">Secretaría</label>
+    <select id="reg_secretaria">
+      <option value="SECRETARÍA ADMINISTRATIVA">SECRETARÍA ADMINISTRATIVA</option>
+      <option value="SECRETARÍA DE EDUCACIÓN">SECRETARÍA DE EDUCACIÓN</option>
+      <option value="SECRETARÍA DE HACIENDA">SECRETARÍA DE HACIENDA</option>
+      <option value="GESTIÓN DE RIESGO RISARALDA">GESTIÓN DE RIESGO RISARALDA</option>
+      <option value="SECRETARÍA DE PLANEACIÓN">SECRETARÍA DE PLANEACIÓN</option>
+      <option value="SECRETARÍA DE SALUD">SECRETARÍA DE SALUD</option>
+      <option value="SECRETARÍA DE INFRAESTRUCTURA">SECRETARÍA DE INFRAESTRUCTURA</option>
+      <option value="SECRETARÍA DE DEPORTES, RECREACIÓN Y CULTURA">SECRETARÍA DE DEPORTES, RECREACIÓN Y CULTURA</option>
+      <option value="SECRETARÍA JURÍDICA">SECRETARÍA JURÍDICA</option>
+      <option value="SECRETARÍA DE LA MUJER FAMILIA Y DESARROLLO SOCIAL">SECRETARÍA DE LA MUJER FAMILIA Y DESARROLLO SOCIAL</option>
+      <option value="OTROS">OTROS</option>
+    </select>
     <input type="password" id="reg_contrasena" placeholder="Contraseña">
     <div style="text-align:left;margin:8px 0;">
       <label style="font-weight:normal;"><input type="checkbox" id="reg_acepta"> Acepto términos y condiciones</label>
@@ -924,8 +948,36 @@ function mostrarUsuario() {
       <h2>Perfil de Usuario</h2>
       <div class="form-section">
         <div><label>Nombre</label><input type="text" id="perfilNombre" value="${u.apoderado || ''}"></div>
+        <div><label>Apellido</label><input type="text" id="perfilApellido" value="${u.apellido || ''}"></div>
         <div><label>Correo</label><input type="email" id="perfilCorreo" value="${u.correo || ''}"></div>
-        <div><label>Secretaría</label><input type="text" id="perfilSecretaria" value="${u.secretaria || ''}"></div>
+        <div><label>Teléfono</label><input type="text" id="perfilTelefono" value="${u.telefono || ''}"></div>
+        <div><label>Tipo de documento</label>
+          <select id="perfilTipoDocumento">
+            <option value="CC">Cédula de Ciudadanía</option>
+            <option value="TI">Tarjeta de Identidad</option>
+            <option value="CE">Cédula de Extranjería</option>
+            <option value="PA">Pasaporte</option>
+            <option value="RC">Registro Civil</option>
+            <option value="NIT">NIT</option>
+            <option value="OTRO">Otro</option>
+          </select>
+        </div>
+        <div><label>Documento</label><input type="text" id="perfilDocumento" value="${u.documento || ''}"></div>
+        <div><label>Secretaría</label>
+          <select id="perfilSecretaria">
+            <option value="SECRETARÍA ADMINISTRATIVA">SECRETARÍA ADMINISTRATIVA</option>
+            <option value="SECRETARÍA DE EDUCACIÓN">SECRETARÍA DE EDUCACIÓN</option>
+            <option value="SECRETARÍA DE HACIENDA">SECRETARÍA DE HACIENDA</option>
+            <option value="GESTIÓN DE RIESGO RISARALDA">GESTIÓN DE RIESGO RISARALDA</option>
+            <option value="SECRETARÍA DE PLANEACIÓN">SECRETARÍA DE PLANEACIÓN</option>
+            <option value="SECRETARÍA DE SALUD">SECRETARÍA DE SALUD</option>
+            <option value="SECRETARÍA DE INFRAESTRUCTURA">SECRETARÍA DE INFRAESTRUCTURA</option>
+            <option value="SECRETARÍA DE DEPORTES, RECREACIÓN Y CULTURA">SECRETARÍA DE DEPORTES, RECREACIÓN Y CULTURA</option>
+            <option value="SECRETARÍA JURÍDICA">SECRETARÍA JURÍDICA</option>
+            <option value="SECRETARÍA DE LA MUJER FAMILIA Y DESARROLLO SOCIAL">SECRETARÍA DE LA MUJER FAMILIA Y DESARROLLO SOCIAL</option>
+            <option value="OTROS">OTROS</option>
+          </select>
+        </div>
         <div><label>Teléfono</label><input type="text" id="perfilTelefono" value="${u.telefono || ''}"></div>
       </div>
       <div class="form-buttons">
@@ -933,13 +985,27 @@ function mostrarUsuario() {
         <button type="button" onclick="cerrarSesion()">Cerrar sesión</button>
       </div>
     </div>`;
+
+  // Set the selected value for the secretaria dropdown
+  const perfilSecretariaSelect = document.getElementById('perfilSecretaria');
+  if (perfilSecretariaSelect && u.secretaria) {
+    perfilSecretariaSelect.value = u.secretaria;
+  }
+
+  const perfilTipoDocumentoSelect = document.getElementById('perfilTipoDocumento');
+  if (perfilTipoDocumentoSelect && u.tipoDocumento) {
+    perfilTipoDocumentoSelect.value = u.tipoDocumento;
+  }
 }
 
 function guardarPerfil() {
   usuarioActivo.apoderado = document.getElementById('perfilNombre').value.trim();
+  usuarioActivo.apellido = document.getElementById('perfilApellido').value.trim();
   usuarioActivo.correo = document.getElementById('perfilCorreo').value.trim();
-  usuarioActivo.secretaria = document.getElementById('perfilSecretaria').value.trim();
   usuarioActivo.telefono = document.getElementById('perfilTelefono').value.trim();
+  usuarioActivo.tipoDocumento = document.getElementById('perfilTipoDocumento').value;
+  usuarioActivo.documento = document.getElementById('perfilDocumento').value.trim();
+  usuarioActivo.secretaria = document.getElementById('perfilSecretaria').value;
   // persistir cambios
   saveState();
   alert('Perfil guardado.');
@@ -957,7 +1023,9 @@ function editarUsuario(index) {
   document.getElementById('reg_apellido').value = u.apellido;
   document.getElementById('reg_telefono').value = u.telefono;
   document.getElementById('reg_correo').value = u.correo;
+  document.getElementById('reg_tipoDocumento').value = u.tipoDocumento || 'CC'; // Default to CC if not set
   document.getElementById('reg_documento').value = u.documento;
+  document.getElementById('reg_secretaria').value = u.secretaria || 'OTROS'; // Default to OTROS if not set
   document.getElementById('reg_contrasena').value = u.contrasena;
   document.getElementById('reg_acepta').checked = true;
   const submit = document.getElementById('reg_submit');
@@ -983,12 +1051,14 @@ function registrarUsuario() {
   const apellido = document.getElementById('reg_apellido').value.trim();
   const telefono = document.getElementById('reg_telefono').value.trim();
   const correo = document.getElementById('reg_correo').value.trim();
+  const tipoDocumento = document.getElementById('reg_tipoDocumento').value;
   const documento = document.getElementById('reg_documento').value.trim();
+  const secretaria = document.getElementById('reg_secretaria').value;
   const contrasena = document.getElementById('reg_contrasena').value;
   const acepta = document.getElementById('reg_acepta').checked;
   const idx = parseInt(document.getElementById('reg_index').value, 10);
 
-  if (!nombre || !apellido || !telefono || !correo || !documento || !contrasena) {
+  if (!nombre || !apellido || !telefono || !correo || !tipoDocumento || !documento || !secretaria || !contrasena) {
     alert('Por favor complete todos los campos.');
     return;
   }
@@ -999,14 +1069,14 @@ function registrarUsuario() {
 
   if (!isNaN(idx) && idx >= 0 && idx < users.length) {
     // Editar usuario existente
-    users[idx] = { nombre, apellido, telefono, correo, documento, contrasena };
+    users[idx] = { nombre, apellido, telefono, correo, tipoDocumento, documento, secretaria, contrasena };
     // Si el usuario quemado coincide con el correo antiguo, actualizar
     usuarioQuemado.correo = correo;
     usuarioQuemado.contrasena = contrasena;
     saveState();
     alert('Usuario actualizado.');
   } else {
-    const nuevo = { nombre, apellido, telefono, correo, documento, contrasena };
+    const nuevo = { nombre, apellido, telefono, correo, tipoDocumento, documento, secretaria, contrasena };
     users.push(nuevo);
     // Para permitir iniciar sesión con el nuevo usuario en este demo, actualizamos el usuario quemado
     usuarioQuemado.correo = correo;
@@ -1015,6 +1085,7 @@ function registrarUsuario() {
     usuarioActivo.apoderado = nombre + (apellido ? ' ' + apellido : '');
     usuarioActivo.correo = correo;
     usuarioActivo.telefono = telefono;
+    usuarioActivo.secretaria = secretaria;
     saveState();
     alert('Registro exitoso. Usuario agregado.');
   }
