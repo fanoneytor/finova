@@ -332,11 +332,7 @@
     </div>
 
     <div class="menu-item">
-      <button onclick="toggleSubmenu()">Procesos</button>
-      <div class="submenu" id="submenu">
-        <button onclick="mostrarFormulario1()">Nuevo proceso</button>
-        <button id="totalProcesosBtn" onclick="mostrarResumenProcesos()">Total de procesos: <span id="contador">0</span></button>
-      </div>
+      <button onclick="mostrarResumenProcesos()">Procesos</button>
     </div>
 
     <div class="menu-item">
@@ -533,6 +529,7 @@ function mostrarResumenProcesos() {
   let procesosHtml = `
     <div class="formulario">
       <h2>Resumen de Procesos (${listaProcesos.length} en total)</h2>
+      <div class="form-buttons" style="text-align:right;margin-bottom:10px;"><button type="button" onclick="mostrarFormulario1()">Crear nuevo proceso</button></div>
   `;
 
   if (listaProcesos.length === 0) {
