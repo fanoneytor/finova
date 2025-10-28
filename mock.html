@@ -710,9 +710,10 @@ function mostrarFormulario2() {
   document.getElementById('content').innerHTML = `
     <div class="formulario">
       <div class="progress">
-        <span>Parte 2 de 2</span>
+        <span>Parte 2 de 3</span>
         <div class="circle"></div>
         <div class="circle active"></div>
+        <div class="circle"></div>
       </div>
       <h2>Detalles del Proceso</h2>
       <div class="form-section">
@@ -824,7 +825,7 @@ function mostrarFormulario2() {
 
       <div class="form-buttons">
         <button onclick="mostrarFormulario1()">Volver</button>
-        <button onclick="guardarProceso()">Guardar</button>
+        <button onclick="mostrarFormulario3()">Guardar y continuar</button>
       </div>
     </div>`;
 }
@@ -834,6 +835,99 @@ function toggleValorCautelar() {
   const valor = document.getElementById("valorCautelar");
   valor.value = medida === "no" ? "N/A" : "";
   valor.readOnly = medida === "no";
+}
+
+function mostrarFormulario3() {
+  document.getElementById('content').innerHTML = `
+    <div class="formulario">
+      <div class="progress">
+        <span>Parte 3 de 3</span>
+        <div class="circle"></div>
+        <div class="circle"></div>
+        <div class="circle active"></div>
+      </div>
+      <h2>Cargue de Documentos</h2>
+      <div class="form-section" style="display: block;">
+        <div style="margin-bottom: 15px;">
+          <div style="display: flex; justify-content: space-between; align-items: center; padding: 8px; border-bottom: 1px solid #eee;">
+            <span>Dda</span>
+            <div>
+              <button onclick="visualizarDocumento('Dda')" style="background: none; border: none; cursor: pointer; margin-right: 5px;">👁️</button>
+              <button onclick="modificarDocumento('Dda')" style="background: none; border: none; cursor: pointer; margin-right: 5px;">✏️</button>
+              <button onclick="descargarDocumento('Dda')" style="background: none; border: none; cursor: pointer; margin-right: 5px;">⬇️</button>
+              <button onclick="eliminarDocumento('Dda')" style="background: none; border: none; cursor: pointer;">🗑️</button>
+            </div>
+          </div>
+          <div style="display: flex; justify-content: space-between; align-items: center; padding: 8px; border-bottom: 1px solid #eee;">
+            <span>Anexos</span>
+            <div>
+              <button onclick="visualizarDocumento('Anexos')" style="background: none; border: none; cursor: pointer; margin-right: 5px;">👁️</button>
+              <button onclick="modificarDocumento('Anexos')" style="background: none; border: none; cursor: pointer; margin-right: 5px;">✏️</button>
+              <button onclick="descargarDocumento('Anexos')" style="background: none; border: none; cursor: pointer; margin-right: 5px;">⬇️</button>
+              <button onclick="eliminarDocumento('Anexos')" style="background: none; border: none; cursor: pointer;">🗑️</button>
+            </div>
+          </div>
+          <div style="display: flex; justify-content: space-between; align-items: center; padding: 8px; border-bottom: 1px solid #eee;">
+            <span>Poder</span>
+            <div>
+              <button onclick="visualizarDocumento('Poder')" style="background: none; border: none; cursor: pointer; margin-right: 5px;">👁️</button>
+              <button onclick="modificarDocumento('Poder')" style="background: none; border: none; cursor: pointer; margin-right: 5px;">✏️</button>
+              <button onclick="descargarDocumento('Poder')" style="background: none; border: none; cursor: pointer; margin-right: 5px;">⬇️</button>
+              <button onclick="eliminarDocumento('Poder')" style="background: none; border: none; cursor: pointer;">🗑️</button>
+            </div>
+          </div>
+          <div style="display: flex; justify-content: space-between; align-items: center; padding: 8px; border-bottom: 1px solid #eee;">
+            <span>Contestación</span>
+            <div>
+              <button onclick="visualizarDocumento('Contestación')" style="background: none; border: none; cursor: pointer; margin-right: 5px;">👁️</button>
+              <button onclick="modificarDocumento('Contestación')" style="background: none; border: none; cursor: pointer; margin-right: 5px;">✏️</button>
+              <button onclick="descargarDocumento('Contestación')" style="background: none; border: none; cursor: pointer; margin-right: 5px;">⬇️</button>
+              <button onclick="eliminarDocumento('Contestación')" style="background: none; border: none; cursor: pointer;">🗑️</button>
+            </div>
+          </div>
+          <div style="display: flex; justify-content: space-between; align-items: center; padding: 8px; border-bottom: 1px solid #eee;">
+            <span>Alegatos de conclusión</span>
+            <div>
+              <button onclick="visualizarDocumento('Alegatos de conclusión')" style="background: none; border: none; cursor: pointer; margin-right: 5px;">👁️</button>
+              <button onclick="modificarDocumento('Alegatos de conclusión')" style="background: none; border: none; cursor: pointer; margin-right: 5px;">✏️</button>
+              <button onclick="descargarDocumento('Alegatos de conclusión')" style="background: none; border: none; cursor: pointer; margin-right: 5px;">⬇️</button>
+              <button onclick="eliminarDocumento('Alegatos de conclusión')" style="background: none; border: none; cursor: pointer;">🗑️</button>
+            </div>
+          </div>
+          <div style="display: flex; justify-content: space-between; align-items: center; padding: 8px; border-bottom: 1px solid #eee;">
+            <span>Fallo</span>
+            <div>
+              <button onclick="visualizarDocumento('Fallo')" style="background: none; border: none; cursor: pointer; margin-right: 5px;">👁️</button>
+              <button onclick="modificarDocumento('Fallo')" style="background: none; border: none; cursor: pointer; margin-right: 5px;">✏️</button>
+              <button onclick="descargarDocumento('Fallo')" style="background: none; border: none; cursor: pointer; margin-right: 5px;">⬇️</button>
+              <button onclick="eliminarDocumento('Fallo')" style="background: none; border: none; cursor: pointer;">🗑️</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="form-buttons">
+        <button onclick="mostrarFormulario2()">Volver</button>
+        <button onclick="guardarProceso()">Guardar</button>
+      </div>
+    </div>`;
+}
+
+// Placeholder functions for document actions
+function visualizarDocumento(docName) {
+  alert(`Visualizar documento: ${docName}`);
+}
+
+function modificarDocumento(docName) {
+  alert(`Modificar documento: ${docName}`);
+}
+
+function descargarDocumento(docName) {
+  alert(`Descargar documento: ${docName}`);
+}
+
+function eliminarDocumento(docName) {
+  alert(`Eliminar documento: ${docName}`);
 }
 
 // Enviar código (simulado) por SMS
