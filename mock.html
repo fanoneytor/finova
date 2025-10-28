@@ -311,7 +311,7 @@
       <button onclick="toggleSubmenu()">Procesos</button>
       <div class="submenu" id="submenu">
         <button onclick="mostrarFormulario1()">Nuevo proceso</button>
-        <button>Total de procesos: <span id="contador">0</span></button>
+        <button id="totalProcesosBtn" onclick="mostrarResumenProcesos()">Total de procesos: <span id="contador">0</span></button>
       </div>
     </div>
 
@@ -328,6 +328,29 @@
 
 <script>
 let procesos = 0;
+let listaProcesos = [
+  {
+    id: 1,
+    radicado: "12345-2023",
+    demandante: "Juan Pérez",
+    demandado: "Empresa XYZ",
+    estado: "En trámite",
+  },
+  {
+    id: 2,
+    radicado: "67890-2024",
+    demandante: "María García",
+    demandado: "Gobierno Local",
+    estado: "Archivado",
+  },
+  {
+    id: 3,
+    radicado: "11223-2023",
+    demandante: "Pedro López",
+    demandado: "Banco ABC",
+    estado: "Pendiente",
+  },
+]; // Nuevo array para almacenar los procesos
 
 // Variables para flujo de recuperación
 let recoveryCode = null;
@@ -352,6 +375,7 @@ function saveState() {
   try {
     localStorage.setItem('lex_users', JSON.stringify(users));
     localStorage.setItem('lex_procesos', String(procesos));
+    localStorage.setItem('lex_listaProcesos', JSON.stringify(listaProcesos));
     localStorage.setItem('lex_usuarioQuemado', JSON.stringify(usuarioQuemado));
     localStorage.setItem('lex_usuarioActivo', JSON.stringify(usuarioActivo));
   } catch (e) {
@@ -374,6 +398,20 @@ function loadState() {
       const n = parseInt(sProcesos, 10);
       if (!isNaN(n)) procesos = n;
     }
+
+    const sListaProcesos = localStorage.getItem('lex_listaProcesos');
+    if (sListaProcesos) {
+      const parsed = JSON.parse(sListaProcesos);
+      if (Array.isArray(parsed)) {
+        listaProcesos.splice(0, listaProcesos.length, ...parsed);
+      }
+    } else {
+      // If no data in localStorage, use the initial mock data and save it
+      saveState();
+    }
+
+    // Update procesos count based on listaProcesos length
+    procesos = listaProcesos.length;
 
     const sUq = localStorage.getItem('lex_usuarioQuemado');
     if (sUq) {
@@ -466,7 +504,60 @@ function toggleSubmenu() {
   submenu.style.display = submenu.style.display === 'block' ? 'none' : 'block';
 }
 
+function mostrarResumenProcesos() {
+  const contentArea = document.getElementById('content');
+  let procesosHtml = `
+    <div class="formulario">
+      <h2>Resumen de Procesos (${listaProcesos.length} en total)</h2>
+  `;
 
+  if (listaProcesos.length === 0) {
+    procesosHtml += `<p>No hay procesos registrados aún.</p>`;
+  } else {
+    procesosHtml += `
+      <table style="width:100%; border-collapse: collapse; margin-top: 20px;">
+        <thead>
+          <tr style="background-color: #f2f2f2;">
+            <th style="padding: 8px; border: 1px solid #ddd; text-align: left;">ID</th>
+            <th style="padding: 8px; border: 1px solid #ddd; text-align: left;">Radicado</th>
+            <th style="padding: 8px; border: 1px solid #ddd; text-align: left;">Demandante</th>
+            <th style="padding: 8px; border: 1px solid #ddd; text-align: left;">Demandado</th>
+            <th style="padding: 8px; border: 1px solid #ddd; text-align: left;">Estado</th>
+          </tr>
+        </thead>
+        <tbody>
+    `;
+    listaProcesos.forEach((proceso, index) => {
+      procesosHtml += `
+        <tr>
+          <td style="padding: 8px; border: 1px solid #ddd;">${index + 1}</td>
+          <td style="padding: 8px; border: 1px solid #ddd;">${proceso.radicado || 'N/A'}</td>
+          <td style="padding: 8px; border: 1px solid #ddd;">${proceso.demandante || 'N/A'}</td>
+          <td style="padding: 8px; border: 1px solid #ddd;">${proceso.demandado || 'N/A'}</td>
+          <td style="padding: 8px; border: 1px solid #ddd;">${proceso.estado || 'Activo'}</td>
+        </tr>
+      `;
+    });
+    procesosHtml += `
+        </tbody>
+      </table>
+    `;
+  }
+
+  procesosHtml += `
+      <div class="form-buttons" style="margin-top: 20px;">
+        <button onclick="volverInicioDashboard()">Volver al inicio</button>
+      </div>
+    </div>
+  `;
+  contentArea.innerHTML = procesosHtml;
+}
+
+function volverInicioDashboard() {
+  document.getElementById('content').innerHTML = `
+    <h2>Bienvenido a LexControl</h2>
+    <p>Seleccione una opción del menú para comenzar.</p>`;
+}
 
 function mostrarFormulario1() {
   document.getElementById('content').innerHTML = `
@@ -935,9 +1026,70 @@ function registrarUsuario() {
 
 // Guardar proceso (demo): incrementa contador y actualiza UI
 function guardarProceso() {
-  procesos += 1;
+  // Capturar datos del formulario 1
+  const secretaria = document.querySelector('#content input[value="${usuarioActivo.secretaria}"]').value;
+  const calidad = document.getElementById("calidad").value;
+  const radicado = document.querySelector('#content input[type="text"]').value; // Asumiendo que es el primer input type="text"
+  const nombreDemandante = document.querySelector('#content input[placeholder="Nombre demandante"]').value;
+  const nombreDemandado = document.querySelector('#content input[placeholder="Nombre demandado"]').value;
+  const cedula = document.getElementById("cedulaLabel").nextElementSibling.value;
+  const fechaNotificacion = document.querySelector('#content input[type="date"]').value;
+  const jurisdiccion = document.getElementById("jurisdiccion").value;
+  const accionJudicial = document.getElementById("accionJudicial").value;
+  const corporacion = document.getElementById("coorporacion").value;
+  const despachoJudicial = document.querySelector('#content input[placeholder="Despacho judicial"]').value;
+  const dependenciaResponsable = document.querySelector('#content input[placeholder="Dependencia responsable"]').value;
+  const apoderado = document.querySelector('#content input[value="${usuarioActivo.apoderado}"]').value;
+  const telefono = document.querySelector('#content input[value="${usuarioActivo.telefono}"]').value;
+  const correo = document.querySelector('#content input[value="${usuarioActivo.correo}"]').value;
+
+  // Capturar datos del formulario 2 (simplificado para este ejemplo)
+  const sintesis = document.querySelector('#content textarea[placeholder="De qué trata la DDA"]').value;
+  const hechoGenerador = document.querySelector('#content select').value;
+  const tipoPretensiones = document.querySelector('#content select:nth-of-type(2)').value;
+  const valorMedidaCautelar = document.querySelector('#content input[placeholder="Ingrese valor en números"]').value;
+  const medidaCautelar = document.getElementById("medidaCautelar").value;
+  const valorCautelar = document.getElementById("valorCautelar").value;
+  const fortalezaDefensa = document.querySelector('#content select:nth-of-type(4)').value;
+  const fortalezaProbatoria = document.querySelector('#content select:nth-of-type(5)').value;
+  const riesgosProcesales = document.querySelector('#content select:nth-of-type(6)').value;
+  const nivelJurisprudencial = document.querySelector('#content select:nth-of-type(7)').value;
+  const fechaFallo = document.querySelector('#content input[type="date"]:nth-of-type(2)').value;
+
+  const nuevoProceso = {
+    id: listaProcesos.length + 1,
+    secretaria,
+    calidad,
+    radicado,
+    demandante: nombreDemandante,
+    demandado: nombreDemandado,
+    cedula,
+    fechaNotificacion,
+    jurisdiccion,
+    accionJudicial,
+    corporacion,
+    despachoJudicial,
+    dependenciaResponsable,
+    apoderado,
+    telefono,
+    correo,
+    sintesis,
+    hechoGenerador,
+    tipoPretensiones,
+    valorMedidaCautelar,
+    medidaCautelar,
+    valorCautelar,
+    fortalezaDefensa,
+    fortalezaProbatoria,
+    riesgosProcesales,
+    nivelJurisprudencial,
+    fechaFallo,
+    estado: "Activo" // Estado por defecto
+  };
+
+  listaProcesos.push(nuevoProceso);
+  procesos = listaProcesos.length;
   document.getElementById('contador').textContent = procesos;
-  // persistir el contador
   saveState();
   alert('Proceso guardado. Total de procesos: ' + procesos);
   // Volver al contenido principal
